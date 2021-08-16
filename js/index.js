@@ -7,7 +7,8 @@ const news = {
   init() {
     this.fetchArticles().then(data => {
       this.createArticleInstances(data).then(
-        this.renderArticles()
+        this.renderArticles(),
+        this.addEventListeners()
       )
     })
   },
@@ -17,6 +18,7 @@ const news = {
     const data = await response.json();
     return await data;
   },
+  
   async createArticleInstances(data) {
     await data.news.forEach(article => {
       let newArticle = new Article(article.UUID, article.title, article.content, article.imageURI, article.likes, article.publicationDate);
@@ -27,26 +29,32 @@ const news = {
   
   renderArticles() {
     const container = document.getElementById('container');
-    console.log(container);
-    this.articles.forEach(article => {
+    container.innerHTML = "";
+    this.articles.forEach((article, index) => {
       let HTMLstring = `
       <article>
         <header>
-          <h2>${article._titel}</h2>
-          <h5>${this.timeConverter(article._datum)}</h5>
+          <h2>${article.titel}</h2>
+          <h5>${this.timeConverter(article.datum)}</h5>
         </header>
         <div class="body">
           <img
-            src = "${article._imageURL}"
+            src = "${article.imageURL}"
             alt="">
-          <div class="content">${article._content}${article._likes}</div>
+          <div class="content">
+            ${article.content}
+            <div>
+              ${article.likes}
+              <span class="icon-heart"></span>
+            </div>
+            <button class="likeBtn" data-id="${index}">LIKE</button>
+          </div>
         </div>
       </article>
     `;
       container.insertAdjacentHTML('beforeend', HTMLstring);
     });
   },
-  
   timeConverter(UNIX_timestamp) {
     //functie gevonden op stackoverflow https://stackoverflow.com/questions/847185/convert-a-unix-timestamp-to-time-in-javascript
     var a = new Date(UNIX_timestamp * 1000);
@@ -58,6 +66,16 @@ const news = {
     var min = a.getMinutes();
     var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
     return time;
+  },
+  
+  addEventListeners() {
+    let likeButtons = document.getElementsByClassName("likeBtn");
+    for (let likeButton of likeButtons) {
+      let index = likeButton.getAttribute('data-id');
+      likeButton.addEventListener('click', function () {
+        news.articles[index].like(news.articles[index].ID);
+      }, false);
+    }
   }
 };
 
