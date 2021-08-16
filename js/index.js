@@ -4,9 +4,11 @@ import Article from './article.js';
 
 const news = {
     init() {
-  
       this.fetchArticles().then(data => {
-        console.log(data.news);
+        data.news.forEach(article => {
+            let newArticle = new Article(article.UUID, article.title, article.content, article.imageURI, article.likes, article.publicationDate);
+            console.log(newArticle);
+          });
       });
     },
     async fetchArticles() {
